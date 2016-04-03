@@ -43,6 +43,11 @@ Klepet.prototype.procesirajUkaz = function(ukaz) {
         sporocilo = 'Neznan ukaz';
       }
       break;
+    case 'zasebno1':
+      besede.shift();
+      var target = besede.join(' ');
+      $('#poslji-sporocilo').val("/zasebno \"" + target + "\"");
+      break;
     default:
       sporocilo = 'Neznan ukaz.';
       break;
