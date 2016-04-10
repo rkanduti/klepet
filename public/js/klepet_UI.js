@@ -4,7 +4,6 @@ function divElementEnostavniTekst(sporocilo) {
   if (jeSmesko || jeYouTube) {
     sporocilo = sporocilo.replace(/\</g, '&lt;').replace(/\>/g, '&gt;').replace('&lt;img', '<img').replace('png\' /&gt;', 'png\' />');
     sporocilo = sporocilo.replace(/\&lt\;iframe/g, '<iframe').replace(/allowfullscreen&gt;&lt;\/iframe&gt;/g, 'allowfullscreen></iframe>');
-    console.log(sporocilo);
     return $('<div style="font-weight: bold"></div>').html(sporocilo);
   } else {
     return $('<div style="font-weight: bold;"></div>').text(sporocilo);
@@ -18,18 +17,19 @@ function divElementHtmlTekst(sporocilo) {
 function procesirajVnosUporabnika(klepetApp, socket) {
   var sporocilo = $('#poslji-sporocilo').val();
   sporocilo = dodajSmeske(sporocilo);
-  sporocilo = dodajVideo(sporocilo);
   var sistemskoSporocilo;
 
   if (sporocilo.charAt(0) == '/') {
     sistemskoSporocilo = klepetApp.procesirajUkaz(sporocilo);
     if (sistemskoSporocilo) {
       $('#sporocila').append(divElementHtmlTekst(sistemskoSporocilo));
+      dodajVideo(sistemskoSporocilo);
     }
   } else {
     sporocilo = filtirirajVulgarneBesede(sporocilo);
     klepetApp.posljiSporocilo(trenutniKanal, sporocilo);
     $('#sporocila').append(divElementEnostavniTekst(sporocilo));
+    dodajVideo(sporocilo);
     $('#sporocila').scrollTop($('#sporocila').prop('scrollHeight'));
   }
 
@@ -80,6 +80,7 @@ $(document).ready(function() {
   socket.on('sporocilo', function (sporocilo) {
     var novElement = divElementEnostavniTekst(sporocilo.besedilo);
     $('#sporocila').append(novElement);
+    dodajVideo(sporocilo.besedilo);
   });
   
   socket.on('kanali', function(kanali) {
@@ -141,9 +142,22 @@ function dodajVideo(vhodnoBesedilo) {
   var regex = new RegExp("^https://www.youtube.com/watch\\?v=", "gi");
   
   for (var i = 0; i < besede.length; i++) {
-    var temp = besede[i].replace(regex, "$`");
-    besede[i] = "<iframe class='video' src='https://www.youtube.com/embed/" + temp + "' allowfullscreen></iframe>";
+    if (regex.test(besede[i])) {
+      var temp = besede[i].replace(regex, "$`");
+      var video = zgradiVideo(temp);
+      $('#sporocila').append(video);
+    }
   }
   
   return besede.join(' ');
 }
+
+function zgradiVideo(link) {
+  var video = document.createElement("iframe");
+  
+  video.setAttribute("class", "mojVideo");
+  video.setAttribute("src", "https://www.youtube.com/embed/" + link);
+  video.setAttribute("allowFullScreen", "");
+  
+  return video;
+} 

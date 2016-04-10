@@ -58,8 +58,8 @@ a {
   font: 10px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-.video {
+.mojVideo {
   width: 200px;
   height: 150px;
-  padding-left: 20px;
+  margin-left: 20px;
 }
